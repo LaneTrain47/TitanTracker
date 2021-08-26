@@ -13,6 +13,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TitanTracker.Data;
 using TitanTracker.Models;
+using TitanTracker.Services;
+using TitanTracker.Services.Interfaces;
 
 namespace TitanTracker
 {
@@ -30,7 +32,8 @@ namespace TitanTracker
         {
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -39,6 +42,10 @@ namespace TitanTracker
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
+
+            // Custom Services
+            services.AddScoped<IBTRolesService, BTRolesService>();
+            services.AddScoped<IBTCompanyInfoService, BTCompanyInfoService>();
 
 
 

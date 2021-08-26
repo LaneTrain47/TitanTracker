@@ -10,8 +10,8 @@ namespace TitanTracker.Models
     {
         public int Id { get; set; }
 
-
-
+        [DisplayName("Updated ITem")]
+        public string Property { get; set; }
 
         [DisplayName("Previous")]
         public string OldValue { get; set; }
