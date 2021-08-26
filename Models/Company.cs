@@ -23,5 +23,21 @@ namespace TitanTracker.Models
         [NotMapped]
         [DataType(DataType.Upload)]
         public IFormFile ImageFormFile { get; set; }
+
+        [DisplayName("Image Name")]
+        public string ImageFileName { get; set; }
+
+        public byte[] ImageFileData { get; set; }
+
+        [DisplayName("Image Extension")]
+        public string ImageContentType { get; set; }
+
+
+        //--Navigation properties--//
+        public virtual ICollection<BTUser> Members { get; set; } = new HashSet<BTUser>();
+
+        public virtual ICollection<Project> Projects { get; set; } = new HashSet<Project>();
+
+        public virtual ICollection<Invite> Invites { get; set; } = new HashSet<Invite>();
     }
 }

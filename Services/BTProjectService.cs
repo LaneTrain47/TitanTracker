@@ -1,34 +1,35 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TitanTracker.Data;
+using TitanTracker.Models;
 using TitanTracker.Services.Interfaces;
 
-namespace TitanTracker.Services
+namespace Titan_BugTracker.Services
 {
     public class BTProjectService : IBTProjectService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IBTRolesService rolesService;
+        private readonly IBTRolesService _roleService;
 
-        public BTProjectService(ApplicationDbContext context, IBTRolesService rolesService)
+        public BTProjectService(ApplicationDbContext context, IBTRolesService roleService)
         {
-            _context.AddAsync = context;
-            this.rolesService = rolesService;
+            _context = context;
+            _roleService = roleService;
         }
-       
-        //CRUD - Create
+
+        // CRUD - Create  
         public async Task AddNewProjectAsync(Project project)
         {
             try
             {
-                _context.Add(project);
+                await _context.AddAsync(project);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -43,7 +44,7 @@ namespace TitanTracker.Services
             throw new NotImplementedException();
         }
 
-      //CRUD - Archive (Delete)  ******** NOTE ******** 
+        // CRUD - Archive (Delete)  ***** NOTE *****
         public async Task ArchiveProjectAsync(Project project)
         {
             try
@@ -54,7 +55,6 @@ namespace TitanTracker.Services
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -64,14 +64,36 @@ namespace TitanTracker.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<Project>> GetAllProjectsByCompany(int companyId)
+        public async Task<List<Project>> GetAllProjectsByCompany(int companyId)
         {
-            throw new NotImplementedException();
+            List<Project> result = new();
+            try
+            {
+                result = await _context.Projects.Where(p => p.CompanyId == companyId)
+                                                .Include(p => p.ProjectPriority).ToListAsync();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
-        public Task<List<Project>> GetAllProjectsByPriority(int companyId, string priorityName)
+        public async Task<List<Project>> GetAllProjectsByPriority(int companyId, string priorityName)
         {
-            throw new NotImplementedException();
+            List<Project> projects = new();
+            List<Project> result = new();
+            try
+            {
+                projects = await GetAllProjectsByCompany(companyId);
+                result = projects.Where(p => p.ProjectPriority.Name == priorityName).ToList();
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public Task<List<Project>> GetArchivedProjectsByCompany(int companyId)
@@ -84,7 +106,7 @@ namespace TitanTracker.Services
             throw new NotImplementedException();
         }
 
-     //CRUD - Read
+        // CRUD - Read
         public async Task<Project> GetProjectByIdAsync(int projectId, int companyId)
         {
             try
@@ -93,12 +115,12 @@ namespace TitanTracker.Services
                                                 .Include(p => p.Tickets)
                                                 .Include(p => p.Members)
                                                 .Include(p => p.ProjectPriority)
-                                                .FirstOrDefaultAsync(p=>p.Id == projectId && p.CompanyId == companyId);
+                                                .FirstOrDefaultAsync(p => p.Id == projectId && p.CompanyId == companyId);
+
                 return project;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -153,18 +175,16 @@ namespace TitanTracker.Services
             throw new NotImplementedException();
         }
 
-      //CRUD - Update
+       //CRUD - Update
         public async Task UpdateProjectAsync(Project project)
-
         {
             try
             {
                 _context.Update(project);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception)
+            catch 
             {
-
                 throw;
             }
         }
