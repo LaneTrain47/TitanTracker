@@ -6,7 +6,7 @@ using TitanTracker.Models;
 
 namespace TitanTracker.Services.Interfaces
 {
-    public interface IBTTicketService 
+    public interface IBTTicketService
     {
         // CRUD Methods
         public Task AddNewTicketAsync(Ticket ticket);
