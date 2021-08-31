@@ -287,11 +287,6 @@ namespace TitanTracker.Services
             }
         }
 
-        public Task<BTUser> GetTicketDeveloperAsync(int ticketId)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<List<Ticket>> GetTicketsByRoleAsync(string role, string userId, int companyId)
         {
             List<Ticket> tickets = new();

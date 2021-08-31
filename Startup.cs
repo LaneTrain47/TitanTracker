@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using TitanTracker.Data;
 using TitanTracker.Models;
 using TitanTracker.Services;
+using TitanTracker.Services.Factories;
 using TitanTracker.Services.Interfaces;
 
 namespace TitanTracker
@@ -24,7 +25,6 @@ namespace TitanTracker
         {
             Configuration = configuration;
         }
-
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -40,6 +40,7 @@ namespace TitanTracker
 
             services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddClaimsPrincipalFactory<BTUserClaimsPrincipalFactory>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
@@ -48,6 +49,10 @@ namespace TitanTracker
             services.AddScoped<IBTCompanyInfoService, BTCompanyInfoService>();
             services.AddScoped<IBTProjectService, BTProjectService>();
             services.AddScoped<IBTTicketService, BTTicketService>();
+            services.AddScoped<IBTNotificationService, BTNotificationService>();
+            services.AddScoped<IBTInviteService, BTInviteService>();
+            services.AddScoped<IBTTicketHistoryService, BTTicketHistoryService>();
+            services.AddScoped<IBTFileService, BTFileService>();
 
 
 
