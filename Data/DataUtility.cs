@@ -936,5 +936,5 @@ namespace TitanTracker.Data
                 throw;
             }
         }
-
     }
+}
