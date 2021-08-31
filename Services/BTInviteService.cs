@@ -10,7 +10,7 @@ using TitanTracker.Data;
 using TitanTracker.Models;
 using TitanTracker.Services.Interfaces;
 
-namespace Titan_BugTracker.Services
+namespace TitanTracker.Services
 {
     public class BTInviteService : IBTInviteService
     {

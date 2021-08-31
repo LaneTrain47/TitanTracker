@@ -53,6 +53,7 @@ namespace TitanTracker
             services.AddScoped<IBTInviteService, BTInviteService>();
             services.AddScoped<IBTTicketHistoryService, BTTicketHistoryService>();
             services.AddScoped<IBTFileService, BTFileService>();
+            
 
 
 
