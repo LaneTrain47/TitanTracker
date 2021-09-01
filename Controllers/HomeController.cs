@@ -23,7 +23,7 @@ namespace TitanTracker.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Landing()
         {
             return View();
         }
