@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\Home\Landing.cshtml" />
+    <Content Remove="Views\Shared\_Layout_bak.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Views\Home\Landing.cshtml" />
+    <None Remove="Views\Home\Landing.cshtml.bak" />
   </ItemGroup>
 
   <ItemGroup>
