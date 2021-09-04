@@ -2,21 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TitanTracker.Data;
+using TitanTracker.Extensions;
 using TitanTracker.Models;
+using TitanTracker.Models.Enums;
+using TitanTracker.Services.Interfaces;
 
 namespace TitanTracker.Controllers
 {
     public class TicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IBTProjectService _projectService;
+        private readonly UserManager<BTUser> _userManager;
+        private readonly IBTTicketService _ticketService;
 
-        public TicketsController(ApplicationDbContext context)
+        public TicketsController(ApplicationDbContext context,
+                                 IBTProjectService projectService,
+                                 UserManager<BTUser> userManager,
+                                 IBTTicketService ticketService)
         {
             _context = context;
+            _projectService = projectService;
+            _userManager = userManager;
+            _ticketService = ticketService;
         }
 
         // GET: Tickets
@@ -51,14 +64,28 @@ namespace TitanTracker.Controllers
         }
 
         // GET: Tickets/Create
-        public IActionResult Create()
+        public async Task <IActionResult> Create()
         {
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
-            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id");
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id");
-            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id");
+            // get current user
+            BTUser btUser = await _userManager.GetUserAsync(User);
+
+            // get current user's company Id
+            int companyId = User.Identity.GetCompanyId().Value;
+
+
+            if(User.IsInRole(Roles.Admin.ToString())) 
+            { 
+            ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsByCompany(companyId), "Id", "Name");
+            }
+            else
+            {
+                ViewData["ProjectId"] = new SelectList(await _projectService.GetUserProjectsAsync(btUser.Id), "Id", "Name");
+            }
+
+
+            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name");
+            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name");
+
             return View();
         }
 
@@ -67,20 +94,29 @@ namespace TitanTracker.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Created,Updated,Archived,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,DeveloperUserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,ProjectId,TicketTypeId,TicketPriorityId")] Ticket ticket)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                BTUser btUser = await _userManager.GetUserAsync(User);
+
+                ticket.Created = DateTimeOffset.Now;
+                ticket.OwnerUserId = btUser.Id;
+
+                ticket.TicketStatusId = (await _ticketService.LookupTicketStatusIdAsync(BTTicketStatus.New.ToString())).Value;
+
+                await _ticketService.AddNewTicketAsync(ticket);
+
+                
+                //TODO: Add to History
+
+                //TODO: Send Notification
+
+
+                return RedirectToAction("Details", "Projects",new { id = ticket.ProjectId});
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
-            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id", ticket.TicketPriorityId);
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id", ticket.TicketStatusId);
-            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
+
+
             return View(ticket);
         }
 
