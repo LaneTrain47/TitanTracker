@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -71,17 +72,17 @@ namespace TitanTracker.Controllers
         {
             if (ModelState.IsValid)
             {
-                if(model.SelectedUsers != null)
+                if (model.SelectedUsers != null)
                 {
                     List<string> memberIds = (await _projectService.GetAllProjectMembersExceptPMAsync(model.Project.Id))
                                                                    .Select(m => m.Id).ToList();
 
-                    foreach(string item in memberIds)
+                    foreach (string item in memberIds)
                     {
                         await _projectService.RemoveUserFromProjectAsync(item, model.Project.Id);
                     }
 
-                    foreach(string item in model.SelectedUsers)
+                    foreach (string item in model.SelectedUsers)
                     {
                         await _projectService.AddUserToProjectAsync(item, model.Project.Id);
                     }
@@ -90,8 +91,8 @@ namespace TitanTracker.Controllers
                     //return RedirectToAction("Details", "Projects", new { id = model.Project.Id });
                 }
             }
-            
-            
+
+
             return RedirectToAction("AssignMembers", new { id = model.Project.Id });
         }
 
@@ -117,22 +118,41 @@ namespace TitanTracker.Controllers
         }
 
         // GET: Projects/Create
-        public IActionResult Create()
+        [Authorize(Roles="Admin,ProjectManager")]
+        public async Task<IActionResult> Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Id");
-            ViewData["ProjectPriorityId"] = new SelectList(_context.ProjectPriorities, "Id", "Id");
-            return View();
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            // Add ViewModel instance "AddProjectWithPMViewModel"
+            AddProjectWithPMViewModel model = new();
+
+            // Load SelectLists wtih data i.e. PMList & PriorityList
+            model.PMList = new SelectList(await _rolesService.GetUsersInRoleAsync(Roles.ProjectManager.ToString(), companyId), "Id", "FullName");
+            model.PriorityList = new SelectList(_context.ProjectPriorities, "Id", "Name");
+
+            // Return View with viewmodel instance as the model  
+
+            return View(model);
         }
 
-        // POST: Projects/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,CompanyId,Name,Description,StartDate,EndDate,ProjectPriorityId,ImageFileName,ImageFileData,ImageContentType,Archived")] Project project)
         {
+            // Change the above parameter type to "AddProjectWithPMViewModel" as model
+
+            // Test if model is null (aka test whether or not data has been captured from the form)
             if (ModelState.IsValid)
             {
+                // Capture the image if one has been selected
+                // Set companyId of the new project
+                // Use service to add new project to database
+
+                // Then if a PM was selected in the form
+                // Add the PM to the project with service call
+
+
                 _context.Add(project);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
