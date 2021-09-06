@@ -10,6 +10,7 @@ using TitanTracker.Data;
 using TitanTracker.Extensions;
 using TitanTracker.Models;
 using TitanTracker.Models.Enums;
+using TitanTracker.Models.ViewModels;
 using TitanTracker.Services.Interfaces;
 
 namespace TitanTracker.Controllers
@@ -205,6 +206,26 @@ namespace TitanTracker.Controllers
             //ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
             return View(ticket);
         }
+
+        public async Task<IActionResult> AssignDeveloper(int id)
+        {
+            AssignDeveloperViewModel model = new();
+
+            model.Ticket = await _ticketService.GetTicketByIdAsync(id);
+
+            model.Developers = new SelectList(await _projectService.GetProjectMembersByRoleAsync(model.Ticket.ProjectId, Roles.Developer.ToString()),
+                                              "Id", "Full Name");
+            
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignDeveloper(AssignDeveloperViewModel model)
+        {
+
+        }
+
 
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)

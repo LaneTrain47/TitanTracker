@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<TitanTracker.Models.Ticket>
-
+@using TitanTracker.Models.Enums 
 @{
     ViewData["Title"] = "Index";
 }
@@ -87,7 +87,11 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+                @if(User.IsInRole(Roles.Admin.ToString()) || User.IsInRole(Roles.ProjectManager.ToString()))
+                {
+                    <a asp-action="AssignDeveloper" asp-route-id="@item.Id" class="btn btn-xs btn-info">Assign</a>
+                }
             </td>
         </tr>
 }
