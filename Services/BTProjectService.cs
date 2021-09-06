@@ -366,6 +366,32 @@ namespace TitanTracker.Services
             }
         }
 
+        public async Task<List<Project>> GetUnassignedProjectsAsync(int companyId)
+        {
+            List<Project> result = new();
+            List<Project> projects = new();
+
+            try
+            {
+                projects = await _context.Projects.Where(p => p.CompanyId == companyId).ToListAsync();
+
+                foreach(Project proj in projects)
+                {
+                    if ((await GetProjectMembersByRoleAsync(proj.Id,Roles.ProjectManager.ToString())).Count == 0)
+                    {
+                        result.Add(proj);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return result;
+        }
+
         // 4
         public async Task<List<BTUser>> GetUsersNotOnProjectAsync(int projectId, int companyId)
         {
