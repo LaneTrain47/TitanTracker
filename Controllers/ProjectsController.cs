@@ -84,7 +84,7 @@ namespace TitanTracker.Controllers
             AssignPMViewModel model = new();
 
             model.Project = await _projectService.GetProjectByIdAsync(id,companyId);
-            model.PMList = new SelectList(await _rolesService.GetUsersInRoleAsync(Roles.ProjectManager.ToString(), companyId));
+            model.PMList = new SelectList(await _rolesService.GetUsersInRoleAsync(Roles.ProjectManager.ToString(), companyId),"Id","FullName");
 
             return View(model);
         }
