@@ -52,7 +52,7 @@ namespace TitanTracker.Controllers
         public async Task<IActionResult> AllTickets()
         {
             int companyId = User.Identity.GetCompanyId().Value;
-    
+
             List<Ticket> tickets = await _ticketService.GetAllTicketsByCompanyAsync(companyId);
             return View(tickets);
         }
@@ -82,7 +82,7 @@ namespace TitanTracker.Controllers
         }
 
         // GET: Tickets/Create
-        public async Task <IActionResult> Create()
+        public async Task<IActionResult> Create()
         {
             // get current user
             BTUser btUser = await _userManager.GetUserAsync(User);
@@ -91,9 +91,9 @@ namespace TitanTracker.Controllers
             int companyId = User.Identity.GetCompanyId().Value;
 
 
-            if(User.IsInRole(Roles.Admin.ToString())) 
-            { 
-            ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsByCompany(companyId), "Id", "Name");
+            if (User.IsInRole(Roles.Admin.ToString()))
+            {
+                ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsByCompany(companyId), "Id", "Name");
             }
             else
             {
@@ -125,13 +125,13 @@ namespace TitanTracker.Controllers
 
                 await _ticketService.AddNewTicketAsync(ticket);
 
-                
+
                 //TODO: Add to History
 
                 //TODO: Send Notification
 
 
-                return RedirectToAction("Details", "Projects",new { id = ticket.ProjectId});
+                return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId });
             }
 
 
@@ -184,7 +184,7 @@ namespace TitanTracker.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (! await TicketExistsAsync(ticket.Id))
+                    if (!await TicketExistsAsync(ticket.Id))
                     {
                         return NotFound();
                     }
@@ -215,7 +215,7 @@ namespace TitanTracker.Controllers
 
             model.Developers = new SelectList(await _projectService.GetProjectMembersByRoleAsync(model.Ticket.ProjectId, Roles.Developer.ToString()),
                                               "Id", "Full Name");
-            
+
             return View(model);
         }
 
@@ -223,6 +223,15 @@ namespace TitanTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignDeveloper(AssignDeveloperViewModel model)
         {
+            //TODO: Add history
+            //TODO: Send notifications
+
+            if (model.DeveloperId != null)
+            {
+                await _ticketService.AssignTicketAsync(model.Ticket.Id,model.DeveloperId);
+            }
+
+            return RedirectToAction("AllTickets");
 
         }
 
@@ -265,7 +274,7 @@ namespace TitanTracker.Controllers
         private async Task<bool> TicketExistsAsync(int id)
         {
             int companyId = User.Identity.GetCompanyId().Value;
-            return (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).Any(t=>t.Id == id);
+            return (await _ticketService.GetAllTicketsByCompanyAsync(companyId)).Any(t => t.Id == id);
         }
     }
 }
