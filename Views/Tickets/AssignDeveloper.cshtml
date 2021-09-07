@@ -1,36 +1,32 @@
-﻿@model TitanTracker.Models.ViewModels.AddProjectWithPMViewModel
+﻿@model TitanTracker.Models.ViewModels.AssignDeveloperViewModel
+   
 
-@{
-    ViewData["Title"] = "Create";
-}
-
-<h1>Create</h1>
-
-<h4>Project</h4>
+<h4>Ticket Assignment</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="AssignPM" method="post">
-            <input asp-for="Project.Id" hidden />
+        <form asp-action="AssignDeveloper" method="post">
+            <input asp-for="Ticket.Id" hidden />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <p>@Model.Project.Name</p>
+            <p>@Model.Ticket.Title</p>
+            <p>@Model.Ticket.Description</p>
 
             <div class="form-group">
                 <label class="control-label">Select Project Manager</label>
-                <select asp-for="PmId" class="form-control" asp-items="@Model.PMList">
+                <select asp-for="DeveloperId" class="form-control" asp-items="@Model.Developers">
                     <option></option>
                 </select>
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Assign" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="AllTickets">Back to List</a>
 </div>
 
 @section Scripts {
