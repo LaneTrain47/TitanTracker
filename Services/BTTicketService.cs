@@ -253,6 +253,26 @@ namespace TitanTracker.Services
             }
         }
 
+        public async Task<Ticket> GetTicketAsNoTrackingAsync(int ticketId)
+        {
+            try
+            {
+                Ticket ticket = await _context.Tickets
+                                              .Include(t => t.TicketPriority)
+                                              .Include(t => t.TicketStatus)
+                                              .Include(t => t.TicketType)
+                                              .Include(t => t.Project)
+                                              .Include(t => t.DeveloperUser)
+                                              .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticketId);
+                return ticket;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<Ticket> GetTicketByIdAsync(int ticketId)
         {
             try

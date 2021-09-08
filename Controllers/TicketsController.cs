@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,16 +22,22 @@ namespace TitanTracker.Controllers
         private readonly IBTProjectService _projectService;
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTTicketService _ticketService;
+        private readonly IBTTicketHistoryService _historyService;
+        private readonly IBTNotificationService _notificationService;
 
         public TicketsController(ApplicationDbContext context,
                                  IBTProjectService projectService,
                                  UserManager<BTUser> userManager,
-                                 IBTTicketService ticketService)
+                                 IBTTicketService ticketService,
+                                 IBTTicketHistoryService historyService,
+                                 IBTNotificationService notificationService)
         {
             _context = context;
             _projectService = projectService;
             _userManager = userManager;
             _ticketService = ticketService;
+            _historyService = historyService;
+            _notificationService = notificationService;
         }
 
         // GET: Tickets
@@ -110,6 +117,7 @@ namespace TitanTracker.Controllers
         // POST: Tickets/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Description,ProjectId,TicketTypeId,TicketPriorityId")] Ticket ticket)
@@ -125,10 +133,39 @@ namespace TitanTracker.Controllers
 
                 await _ticketService.AddNewTicketAsync(ticket);
 
+                #region Ticket History
+                //TODO: Add to History -- DONE
+                Ticket newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id);
+                await _historyService.AddHistoryAsync(null, newTicket, btUser.Id);
+                #endregion
 
-                //TODO: Add to History
-
+                #region Ticket Notification
                 //TODO: Send Notification
+                BTUser projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+                int companyId = User.Identity.GetCompanyId().Value;
+
+                Notification notification = new()
+                {
+                    TicketId = ticket.Id,
+                    Title = "New Ticket",
+                    Message = $"New Ticket: {ticket.Title} was created by {btUser.FullName}",
+                    Created = DateTimeOffset.Now,
+                    SenderId = btUser.Id,
+                    RecipientId = projectManager?.Id
+                };
+
+                if (projectManager != null)
+                {
+                    await _notificationService.AddNotificationAsync(notification);
+                    await _notificationService.SendEmailNotificationAsync(notification, "New Ticket Added");
+                }
+                else
+                {
+                    //Admin notification
+                    await _notificationService.AddNotificationAsync(notification);
+                    await _notificationService.SendEmailNotificationsByRoleAsync(notification, companyId, Roles.Admin.ToString());
+                }
+                #endregion
 
 
                 return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId });
@@ -173,10 +210,11 @@ namespace TitanTracker.Controllers
 
             if (ModelState.IsValid)
             {
+                BTUser btUser = await _userManager.GetUserAsync(User);
+                Ticket oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id);
                 try
                 {
                     ticket.Updated = DateTimeOffset.Now;
-
                     await _ticketService.UpdateTicketAsync(ticket);
 
                     //TODO: Send notification
@@ -194,9 +232,13 @@ namespace TitanTracker.Controllers
                     }
                 }
 
-                //TODO: Add History
+                //TODO: Add History -- DONE
+                Ticket newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id);
 
-                return RedirectToAction(nameof(Index));
+                await _historyService.AddHistoryAsync(oldTicket, newTicket, btUser.Id);
+
+
+                return RedirectToAction("AllTickets");
             }
             //ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
             //ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
@@ -223,18 +265,34 @@ namespace TitanTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignDeveloper(AssignDeveloperViewModel model)
         {
-            //TODO: Add history
-            //TODO: Send notifications
 
             if (model.DeveloperId != null)
             {
-                await _ticketService.AssignTicketAsync(model.Ticket.Id,model.DeveloperId);
+                //oldTicket
+
+                try
+                {
+                    await _ticketService.AssignTicketAsync(model.Ticket.Id, model.DeveloperId);
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+                //TODO: Add history
+                //newTicket
+
+
+
+                //TODO: Send notifications
+
             }
 
             return RedirectToAction("AllTickets");
 
         }
-
 
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)
