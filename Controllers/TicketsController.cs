@@ -265,45 +265,18 @@ namespace TitanTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignDeveloper(AssignDeveloperViewModel model)
         {
+            //TODO:
+            //Add history
+            //Send notifications
 
             if (model.DeveloperId != null)
             {
-                //TODO:
-                //Add history
-
-                Ticket ticket = await _ticketService.GetTicketByIdAsync(model.Ticket.Id);
-
-                if (model.DeveloperId != null)
-                {
-                    ticket.DeveloperUserId = model.DeveloperId;
-                    ticket.Updated = DateTimeOffset.Now;
-
-                    await _ticketService.UpdateTicketAsync(ticket);
-                }
-
-                try
-                {
-                    await _ticketService.AssignTicketAsync(model.Ticket.Id, model.DeveloperId);
-
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-
-
-
-
-
-                //TODO: Send notifications
-
+                await _ticketService.AssignTicketAsync(model.Ticket.Id, model.DeveloperId);
             }
 
-            return RedirectToAction("AllTickets");
-
+            return RedirectToAction("All Tickets");
         }
-
+            
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
