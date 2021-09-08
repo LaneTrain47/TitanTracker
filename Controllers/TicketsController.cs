@@ -268,7 +268,18 @@ namespace TitanTracker.Controllers
 
             if (model.DeveloperId != null)
             {
-                //oldTicket
+                //TODO:
+                //Add history
+
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(model.Ticket.Id);
+
+                if (model.DeveloperId != null)
+                {
+                    ticket.DeveloperUserId = model.DeveloperId;
+                    ticket.Updated = DateTimeOffset.Now;
+
+                    await _ticketService.UpdateTicketAsync(ticket);
+                }
 
                 try
                 {
@@ -281,8 +292,7 @@ namespace TitanTracker.Controllers
                     throw;
                 }
 
-                //TODO: Add history
-                //newTicket
+
 
 
 
