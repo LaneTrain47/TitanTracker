@@ -7,7 +7,9 @@
 <h1>All Company Projects</h1>
 
 <p>
+    @if(!User.IsInRole(Roles.DemoUser.ToString())) { 
     <a asp-action="Create">Create New</a>
+    }
 </p>
 <table class="table">
     <thead>
