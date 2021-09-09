@@ -125,9 +125,7 @@ namespace TitanTracker.Data
             try
             {
                 IList<Models.ProjectPriority> projectPriorities = new List<ProjectPriority>() {
-
-                    //TODO: Go to 2:25 mark of video 2021_08_30-2 (DataUtility.cs Setup) in order to complete this method
-                    
+                 
                                                     new ProjectPriority() { Name = BTProjectPriority.Low.ToString() },
                                                     new ProjectPriority() { Name = BTProjectPriority.Medium.ToString() },
                                                     new ProjectPriority() { Name = BTProjectPriority.High.ToString() },

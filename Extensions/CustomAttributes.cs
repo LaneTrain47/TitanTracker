@@ -29,10 +29,8 @@ namespace TitanTracker.Extensions
                 }
             }
 
-
             return ValidationResult.Success;
         }
-
 
         public string GetErrorMessage()
         {

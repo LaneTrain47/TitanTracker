@@ -76,9 +76,28 @@ namespace TitanTracker.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string demoEmail = null)
         {
             returnUrl ??= Url.Content("~/Home/Dashboard");
+
+            if (!string.IsNullOrWhiteSpace(demoEmail))
+            {
+                var email = _configuration[demoEmail];
+                var password = _configuration["DemoUserPassword"];
+
+                var result = await _signInManager.PasswordSignInAsync(email, password, false, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Demo User logged in.");
+                    return LocalRedirect(returnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+            }
+
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
@@ -107,31 +126,6 @@ namespace TitanTracker.Areas.Identity.Pages.Account
                     return Page();
                 }
             }
-        }
-
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string demoEmail = null)
-        {
-            returnUrl ??= Url.Content("~/Home/Dashboard");
-
-            if (!string.IsNullOrWhiteSpace(demoEmail))
-            {
-                var email = _configuration[demoEmail];
-                var password = _configuration["DemoUserPassword"];
-
-                var result = await _signInManager.PasswordSignInAsync(email, password, false, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("Demo User logged in.");
-                    return LocalRedirect(returnUrl);
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
-            }
-
-            // If we got this far, something failed, redisplay form
             return Page();
         }
     }

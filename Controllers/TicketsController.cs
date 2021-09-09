@@ -24,13 +24,15 @@ namespace TitanTracker.Controllers
         private readonly IBTTicketService _ticketService;
         private readonly IBTTicketHistoryService _historyService;
         private readonly IBTNotificationService _notificationService;
+        private readonly IBTFileService _fileService;
 
         public TicketsController(ApplicationDbContext context,
                                  IBTProjectService projectService,
                                  UserManager<BTUser> userManager,
                                  IBTTicketService ticketService,
                                  IBTTicketHistoryService historyService,
-                                 IBTNotificationService notificationService)
+                                 IBTNotificationService notificationService,
+                                 IBTFileService fileService)
         {
             _context = context;
             _projectService = projectService;
@@ -38,6 +40,7 @@ namespace TitanTracker.Controllers
             _ticketService = ticketService;
             _historyService = historyService;
             _notificationService = notificationService;
+            _fileService = fileService;
         }
 
         // GET: Tickets
@@ -72,6 +75,9 @@ namespace TitanTracker.Controllers
                 return NotFound();
             }
 
+            //TODO: Ask about usage of "t" vs. "m" below. Should these be uniform?
+            //Compare to Bonus Step 2 image found at https://coderfoundry.bit.ai/docs/view/CLRO2d5NGml6TCMy
+
             var ticket = await _context.Tickets
                 .Include(t => t.DeveloperUser)
                 .Include(t => t.OwnerUser)
@@ -79,6 +85,8 @@ namespace TitanTracker.Controllers
                 .Include(t => t.TicketPriority)
                 .Include(t => t.TicketStatus)
                 .Include(t => t.TicketType)
+                .Include(t => t.Comments)
+                .Include(t => t.Attachments)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
