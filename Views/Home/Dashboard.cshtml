@@ -1,4 +1,15 @@
 ﻿@model IEnumerable<TitanTracker.Models.Project>
+@using TitanTracker.Services.Interfaces
+@using Microsoft.AspNetCore.Identity
+@using TitanTracker.Extensions
+
+@inject IBTCompanyInfoService CompanyService
+@inject UserManager<BTUser> UserManager
+
+@{ BTUser btUser = await UserManager.GetUserAsync(User);
+                int companyId = User.Identity.GetCompanyId().Value;
+}
+
 
 <header class="page-header">
     <h2>Dark Layout</h2>
@@ -134,15 +145,14 @@
                         <div class="widget-summary">
                             <div class="widget-summary-col widget-summary-col-icon">
                                 <div class="summary-icon bg-primary">
-                                    <i class="fas fa-life-ring"></i>
+                                    <i class="fas fa-thumbtack"></i>
                                 </div>
                             </div>
                             <div class="widget-summary-col">
                                 <div class="summary">
-                                    <h4 class="title">Support Questions</h4>
+                                    <h4 class="title">Total Projects</h4>
                                     <div class="info">
-                                        <strong class="amount">1281</strong>
-                                        <span class="text-primary">(14 unread)</span>
+                                        <strong class="amount">@((await CompanyService.GetAllProjectsAsync(companyId)).Count)</strong>
                                     </div>
                                 </div>
                                 <div class="summary-footer">
@@ -164,9 +174,9 @@
                             </div>
                             <div class="widget-summary-col">
                                 <div class="summary">
-                                    <h4 class="title">Total Profit</h4>
+                                    <h4 class="title">Total Tickets</h4>
                                     <div class="info">
-                                        <strong class="amount">$ 14,890.30</strong>
+                                        <strong class="amount">@Model.SelectMany(p => p.Tickets).Count()</strong>
                                     </div>
                                 </div>
                                 <div class="summary-footer">
@@ -185,14 +195,14 @@
                         <div class="widget-summary">
                             <div class="widget-summary-col widget-summary-col-icon">
                                 <div class="summary-icon bg-tertiary">
-                                    <i class="fas fa-shopping-cart"></i>
+                                    <i class="fas fa-user"></i>
                                 </div>
                             </div>
                             <div class="widget-summary-col">
                                 <div class="summary">
-                                    <h4 class="title">Today's Orders</h4>
+                                    <h4 class="title">Company Members</h4>
                                     <div class="info">
-                                        <strong class="amount">38</strong>
+                                        <strong class="amount">@((await CompanyService.GetAllMembersAsync(companyId)).Count)</strong>
                                     </div>
                                 </div>
                                 <div class="summary-footer">
@@ -204,19 +214,19 @@
                 </section>
             </div>
             <div class="col-xl-6">
-                <section class="card card-featured-left card-featured-quaternary">
+                <section class="card card-featured-left card-featured-danger">
                     <div class="card-body">
                         <div class="widget-summary">
                             <div class="widget-summary-col widget-summary-col-icon">
-                                <div class="summary-icon bg-quaternary">
-                                    <i class="fas fa-user"></i>
+                                <div class="summary-icon bg-danger">
+                                    <i class="fas fa-fire"></i>
                                 </div>
                             </div>
                             <div class="widget-summary-col">
                                 <div class="summary">
-                                    <h4 class="title">Today's Visitors</h4>
+                                    <h4 class="title">Urgent Tickets</h4>
                                     <div class="info">
-                                        <strong class="amount">3765</strong>
+                                        <strong class="amount">@Model.SelectMany(p => p.Tickets).Where(p => p.TicketPriority.Name == "Urgent").Count()</strong>
                                     </div>
                                 </div>
                                 <div class="summary-footer">
@@ -240,14 +250,14 @@
                     <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
                 </div>
 
-                <h2 class="card-title">Best Seller</h2>
+                <h2 class="card-title">All Projects</h2>
                 <p class="card-subtitle">Customize the graphs as much as you want, there are so many options and features to display information using Porto Admin Template.</p>
             </header>
             <div class="card-body">
 
                 <!-- Projects Table -->
                 <div>
-                    <table class="table table-bordered table-striped mb-2" id="datatable-default">
+                    <table class="table table-bordered table-striped mb-2" id="">
                         <thead>
                             <tr>
                                 <th>
@@ -260,8 +270,8 @@
                                     @Html.DisplayNameFor(model => model.EndDate)
                                 </th>
                                 @*<th>
-                                    @Html.DisplayNameFor(model => model.ImageFileData)
-                                </th>*@
+                                        @Html.DisplayNameFor(model => model.ImageFileData)
+                                    </th>*@
                                 <th>
                                     @Html.DisplayNameFor(model => model.Archived)
                                 </th>
@@ -285,8 +295,8 @@
                                         @item.EndDate.DateTime.ToString("MM.dd.yyyy")
                                     </td>
                                     @*<td>
-                                        @Html.DisplayFor(modelItem => item.ImageFileData)
-                                    </td>*@
+                                            @Html.DisplayFor(modelItem => item.ImageFileData)
+                                        </td>*@
                                     <td>
                                         @Html.DisplayFor(modelItem => item.Archived)
                                     </td>
@@ -306,7 +316,7 @@
             </div>
         </section>
     </div>
-    </div>
+</div>
 <div class="row pt-4">
     <div class="col-lg-12">
         <section class="card">
@@ -315,14 +325,14 @@
                     <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
                     <a href="#" class="card-action card-action-dismiss" data-card-dismiss></a>
                 </div>
-                <h2 class="card-title">Server Usage</h2>
+                <h2 class="card-title">Tickets</h2>
                 <p class="card-subtitle">It's easy to create custom graphs on Porto Admin Template, there are several graph types that you can use.</p>
             </header>
             <div class="card-body">
 
                 <!-- Tickets Table -->
                 <div>
-                    <table class="table">
+                    <table class="table" id="datatable-default">
                         <thead>
                             <tr>
                                 <th>
@@ -882,7 +892,7 @@
     <script src="/vendor/datatables/extras/TableTools/JSZip-2.5.0/jszip.min.js"></script>
     <script src="/vendor/datatables/extras/TableTools/pdfmake-0.1.32/pdfmake.min.js"></script>
     <script src="/vendor/datatables/extras/TableTools/pdfmake-0.1.32/vfs_fonts.js"></script>
-                 
+
     <script src="/js/examples/examples.datatables.default.js"></script>
     <script src="/js/examples/examples.datatables.row.with.details.js"></script>
     <script src="/js/examples/examples.datatables.tabletools.js"></script>

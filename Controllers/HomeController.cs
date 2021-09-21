@@ -41,7 +41,7 @@ namespace TitanTracker.Controllers
 
             model = await _projectService.GetAllProjectsByCompany(companyId);
             
-            return View();
+            return View(model);
         }
 
         public IActionResult Privacy()
@@ -53,6 +53,24 @@ namespace TitanTracker.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> PieChartMethod()
+        {
+            int companyId = User.Identity.GetCompanyId().Value;
+
+            List<Project> projects = await _projectService.GetAllProjectsByCompany(companyId);
+
+            List<object> chartData = new();
+            chartData.Add(new object[] { "ProjectName", "TicketCount" });
+
+            foreach (Project prj in projects)
+            {
+                chartData.Add(new object[] { prj.Name, prj.Tickets.Count() });
+            }
+
+            return Json(chartData);
         }
     }
 }

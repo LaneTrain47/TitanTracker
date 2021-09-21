@@ -75,19 +75,8 @@ namespace TitanTracker.Controllers
                 return NotFound();
             }
 
-            //TODO: Ask about usage of "t" vs. "m" below. Should these be uniform?
-            //Compare to Bonus Step 2 image found at https://coderfoundry.bit.ai/docs/view/CLRO2d5NGml6TCMy
+            var ticket = await _ticketService.GetTicketByIdAsync(id.Value);
 
-            var ticket = await _context.Tickets
-                .Include(t => t.DeveloperUser)
-                .Include(t => t.OwnerUser)
-                .Include(t => t.Project)
-                .Include(t => t.TicketPriority)
-                .Include(t => t.TicketStatus)
-                .Include(t => t.TicketType)
-                .Include(t => t.Comments)
-                .Include(t => t.Attachments)
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
                 return NotFound();

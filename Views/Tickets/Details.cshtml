@@ -1,8 +1,6 @@
 ﻿@model TitanTracker.Models.Ticket
-@using TitanTracker.Services
+@using TitanTracker.Services.Interfaces
 @inject IBTFileService BTFileService 
-
-@*//TODO: Find out why IBTFileService above is not recognized (Was it added correctly to Tickets Controller? See lines 27, 35 and 43.)*@ 
 
 @{
     ViewData["Title"] = "Details";
