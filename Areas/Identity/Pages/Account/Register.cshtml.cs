@@ -13,7 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using TitanTracker.Data;
 using TitanTracker.Models;
+using TitanTracker.Models.Enums;
 
 namespace TitanTracker.Areas.Identity.Pages.Account
 {
@@ -23,18 +25,20 @@ namespace TitanTracker.Areas.Identity.Pages.Account
         private readonly SignInManager<BTUser> _signInManager;
         private readonly UserManager<BTUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
+        private readonly ApplicationDbContext _context;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<BTUser> userManager,
             SignInManager<BTUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender, ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         [BindProperty]
@@ -58,6 +62,14 @@ namespace TitanTracker.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
+
+            [Required]
+            [Display(Name = "Company Name")]
+            public string CompanyName { get; set; }
+
+            [Display(Name = "Company Description")]
+            public string CompanyDescription { get; set; }
+
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
@@ -88,6 +100,23 @@ namespace TitanTracker.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // -- Add new registrant a role of "Admin" -- //
+                    await _userManager.AddToRoleAsync(user, Roles.Admin.ToString());
+
+                    // -- Create company based on New User input -- //
+                    Company company = new()
+                    {
+                        Name = Input.CompanyName,
+                        Description = Input.CompanyDescription
+                    };
+                    _context.Add(company);
+                    await _context.SaveChangesAsync();
+
+                    // -- Update New User CompanyId --//
+                    user.CompanyId = company.Id;
+                    _context.Update(user);
+                    await _context.SaveChangesAsync();
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

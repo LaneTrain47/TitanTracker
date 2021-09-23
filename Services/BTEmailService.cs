@@ -1,6 +1,7 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using System;
@@ -13,18 +14,20 @@ namespace Titan_BugTracker.Services
 {
     public class BTEmailService : IEmailSender
     {
-        private readonly MailSettings _mailSettings;
+        //private readonly MailSettings _mailSettings;
+        private readonly IConfiguration _configuration;
 
-        public BTEmailService(IOptions<MailSettings> mailSettings)
+        public BTEmailService(IConfiguration configuration)
         {
-            _mailSettings = mailSettings.Value;
+            //_mailSettings = mailSettings.Value;
+            _configuration = configuration;
         }
 
         public async Task SendEmailAsync(string emailTo, string subject, string htmlMessage)
         {
             MimeMessage email = new();
 
-            email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
+            email.Sender = MailboxAddress.Parse(_configuration["MailSettings:Email"]);
             email.To.Add(MailboxAddress.Parse(emailTo));
             email.Subject = subject;
 
@@ -38,8 +41,8 @@ namespace Titan_BugTracker.Services
             try
             {
                 using var smtp = new SmtpClient();
-                smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-                smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
+                smtp.Connect(_configuration["MailSettings:Host"], Convert.ToInt32(_configuration["MailSettings:Port"]), SecureSocketOptions.StartTls);
+                smtp.Authenticate(_configuration["MailSettings:Email"], _configuration["MailSettings:Password"]);
 
                 await smtp.SendAsync(email);
 
