@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject UserManager<BTUser> UserManager
 @using TitanTracker.Models.Enums
- 
+
 @{ BTUser btUser = await UserManager.GetUserAsync(User);
 }
 
@@ -249,9 +249,9 @@
                         <div class="profile-info" data-lock-name="@btUser.FullName" data-lock-email="@btUser.Email">
                             <span class="name">@btUser.FullName</span>
                             @{
-                                            @foreach (var role in await UserManager.GetRolesAsync(btUser))
-                                            {
-                                <span class="role">@role</span>} }
+                                @foreach (var role in await UserManager.GetRolesAsync(btUser))
+                                {
+                                    <span class="role">@role</span>} }
                         </div>
 
                         <i class="fa custom-caret"></i>
@@ -319,11 +319,11 @@
                                         </li>
                                         @if (User.IsInRole(Roles.Admin.ToString()) || User.IsInRole(Roles.ProjectManager.ToString()))
                                         {
-                                        <li>
-                                            <a class="nav-link" asp-action="AssignPMIndex" asp-controller="Projects">
-                                                Assign Project Managers
-                                            </a>
-                                        </li>
+                                            <li>
+                                                <a class="nav-link" asp-action="AssignPMIndex" asp-controller="Projects">
+                                                    Assign Project Managers
+                                                </a>
+                                            </li>
                                         }
                                         <li class="nav-parent">
                                             <a class="nav-link" href="#">
@@ -1220,5 +1220,43 @@
     <!-- Examples -->
     <script src="/js/examples/examples.dashboard.js"></script>
     @RenderSection("scripts", required: false)
+
+
+    <style>
+        #ChartistCSSAnimation .ct-series.ct-series-a .ct-line {
+            fill: none;
+            stroke-width: 4px;
+            stroke-dasharray: 5px;
+            -webkit-animation: dashoffset 1s linear infinite;
+            -moz-animation: dashoffset 1s linear infinite;
+            animation: dashoffset 1s linear infinite;
+        }
+
+        #ChartistCSSAnimation .ct-series.ct-series-b .ct-point {
+            -webkit-animation: bouncing-stroke 0.5s ease infinite;
+            -moz-animation: bouncing-stroke 0.5s ease infinite;
+            animation: bouncing-stroke 0.5s ease infinite;
+        }
+
+        #ChartistCSSAnimation .ct-series.ct-series-b .ct-line {
+            fill: none;
+            stroke-width: 3px;
+        }
+
+        #ChartistCSSAnimation .ct-series.ct-series-c .ct-point {
+            -webkit-animation: exploding-stroke 1s ease-out infinite;
+            -moz-animation: exploding-stroke 1s ease-out infinite;
+            animation: exploding-stroke 1s ease-out infinite;
+        }
+
+        #ChartistCSSAnimation .ct-series.ct-series-c .ct-line {
+            fill: none;
+            stroke-width: 2px;
+            stroke-dasharray: 40px 3px;
+        }
+    </style>
+
+    <script src="/js/examples/examples.charts.js"></script>
+
 </body>
 </html>

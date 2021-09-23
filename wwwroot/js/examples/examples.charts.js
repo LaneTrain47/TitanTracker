@@ -235,8 +235,10 @@ Theme Version: 	4.0.0
 		Morris.Donut({
 			resize: true,
 			element: 'morrisDonut',
+			backgroundColor: '#2f353e',
+			labelColor: '#d9d9d9',
 			data: morrisDonutData,
-			colors: ['#0088cc', '#734ba9', '#E36159']
+			colors: ['#ff3333', '#734ba9', '#E36159', '#ff339b']
 		});
 	}
 
