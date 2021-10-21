@@ -10,8 +10,8 @@ using TitanTracker.Data;
 namespace TitanTracker.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210826040241_Initial_001")]
-    partial class Initial_001
+    [Migration("20211021192655_001_Initial")]
+    partial class _001_Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
